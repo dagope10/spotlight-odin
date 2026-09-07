@@ -1,8 +1,9 @@
 package platform
 
 import "vendor:egl"
+import "core:c"
 import "vendor:x11/xlib"
-X11State :: struct {
+X11_State :: struct {
     screen_number: i32,
     display : ^xlib.Display,
     root : xlib.Window,
@@ -13,7 +14,7 @@ X11State :: struct {
     delete_window: xlib.Atom,
 }
 
-EGLState :: struct {
+EGL_State :: struct {
     display: egl.Display,
     config: egl.Config,
     surface: egl.Surface,
@@ -21,7 +22,16 @@ EGLState :: struct {
 }
 
 
+Hints :: struct {
+    flags: c.ulong,
+    functions: c.ulong,
+    decorations: c.ulong,
+    input_mode: c.long,
+    status: c.ulong,
+}
 
+MWM_HINTS_DECORATIONS :: c.ulong(1 << 1)
+XA_ATOM :: xlib.Atom(4)
 
 
 

@@ -2,9 +2,9 @@ package platform
 
 import "vendor:egl"
 import "core:fmt"
-egl_init :: proc(x11: ^X11State) -> EGLState {
+egl_init :: proc(x11: ^X11_State) -> EGL_State {
 
-    egl_state: EGLState
+    egl_state: EGL_State
     egl_state.display = egl.GetPlatformDisplay(egl.Platform.X11_KHR, x11.display, nil)
     assert(egl_state.display != egl.NO_DISPLAY)
     assert(egl.Initialize(egl_state.display, nil, nil) != egl.FALSE)
@@ -34,10 +34,14 @@ egl_init :: proc(x11: ^X11State) -> EGLState {
     return egl_state
 }
 
-egl_release :: proc(egl_state: ^EGLState) {
+egl_release :: proc(egl_state: ^EGL_State) {
     egl.MakeCurrent(egl_state.display, egl.NO_SURFACE, egl.NO_SURFACE, egl.NO_CONTEXT);
     egl.DestroySurface(egl_state.display, egl_state.surface);
     egl.DestroyContext(egl_state.display, egl_state.ctxt);
     egl.Terminate(egl_state.display);
+}
+
+egl_present :: proc(egl_state: ^EGL_State) {
+    egl.SwapBuffers(egl_state.display, egl_state.surface)
 }
 

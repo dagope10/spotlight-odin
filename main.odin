@@ -11,54 +11,96 @@ import "gfx"
 
 
 main :: proc() {
-    arena : mem.Arena
+
+    // if true do return
+    // Initializers
+    arena: mem.Arena
     data := make([]u8, 4 * mem.Megabyte)
     mem.arena_init(&arena, data)
-    fmt.println("Arena initialized")
-    when false {
-        running := true
-        x11 := platform.x11_init()
-        defer xlib.CloseDisplay(x11.display)
-        egl_state := platform.egl_init(&x11)
+    
+    app := init_app_state()
+    x11 := platform.init(800, 600)
+    egl_state := platform.egl_init(&x11)
 
-        xlib.MapWindow(x11.display, x11.window)
-        xlib.Flush(x11.display)
-        xlib.SelectInput(x11.display, x11.window, xlib.EventMask{.KeyPress, .StructureNotify})
-        gl.load_up_to(4, 6, egl.gl_set_proc_address)
+    platform.show_window(&x11)
 
-        fmt.println("GL Version: ", string(gl.GetString(gl.VERSION)))
-        fmt.println("GL Renderer: ", string(gl.GetString(gl.RENDERER)))
+    gl.load_up_to(4, 6, egl.gl_set_proc_address)
 
-        gfx.init(800, 600)
-        gfx.resize(800,600)
-        
-        
-        for running {
-            event : xlib.XEvent
+    fmt.println("GL Version: ", string(gl.GetString(gl.VERSION)))
+    fmt.println("GL Renderer: ", string(gl.GetString(gl.RENDERER)))
+
+    renderer := gfx.init()
+
+    
+    
+    for app.running {
+        event_flags: Event_Flags = {}
+        event : xlib.XEvent
+        xlib.NextEvent(x11.display, &event)
+        event_flags |= process_event(&app, &x11, &event)
+
+        for xlib.Pending(x11.display) > 0 {
             xlib.NextEvent(x11.display, &event)
-            #partial switch event.type {
-                case .KeyPress:
-                key := xlib.LookupKeysym(&event.xkey, 0)
-                fmt.printfln("tecla: %v\n", key)
+            event_flags |= process_event(&app, &x11, &event)
+            if .Resize in event_flags {
+                gfx.resize(&renderer, app.width, app.height)
+            }
+            if .Exit in event_flags {
+                app.running = false
+            }
 
-                case .ConfigureNotify:
-                configure := event.xconfigure
-                gfx.resize(configure.width, configure.height)
-                gfx.renderer_clear()
-                // Main box
-                gfx.draw_rect(100, 50, 600, 500, gfx.RED)
-                gfx.draw_rect(120, 70, 560, 120, gfx.BLACK)
-                gfx.draw_rect(120, 210, 560, 120, gfx.BLACK)
-                gfx.draw_rect(120, 350, 560, 120, gfx.WHITE)
-                egl.SwapBuffers(egl_state.display, egl_state.surface)
-
-                case .ClientMessage:
-                if xlib.Atom(event.xclient.data.l[0]) == x11.delete_window do running = false
-                
+            if .Redraw in event_flags {
+                draw(&renderer, &app)
+                platform.egl_present(&egl_state)
             }
         }
-        fmt.println("Adios!")
-        platform.egl_release(&egl_state)
-        platform.x11_release(&x11)
+       
     }
+    fmt.println("Adios!")
+
+}
+
+
+init_app_state :: proc() -> App_State {
+    return App_State{
+        running = true,
+        width = 800,
+        height = 600
+    }
+}
+
+process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XEvent) ->Event_Flags {
+    event_flags: Event_Flags = {}
+    #partial switch event.type {
+        case .KeyPress:
+        key := xlib.LookupKeysym(&event.xkey, 0)
+        fmt.printfln("tecla: %v\n", key)
+
+        case .ConfigureNotify:
+        configure := event.xconfigure
+        app.width = u32(configure.width)
+        app.height = u32(configure.height)
+        
+        event_flags |= {.Resize}
+        event_flags |= {.Redraw}
+
+        case .ClientMessage:
+        if xlib.Atom(event.xclient.data.l[0]) == x11.delete_window do app.running = false
+
+        case .Expose:
+        event_flags |= {.Redraw}         
+    }
+    return event_flags
+}
+
+
+draw :: proc(r: ^gfx.Renderer, app: ^App_State) {
+    gfx.resize(r, app.width, app.height)
+    gfx.renderer_clear()
+
+    gfx.draw_rect(r, 100, 50, 600, 500, gfx.WHITE)
+    gfx.draw_rect(r, 120, 70, 560, 120, gfx.WHITE)
+    gfx.draw_rect(r, 120, 210, 560, 120, gfx.WHITE)
+    gfx.draw_rect(r, 120, 350, 560, 120, gfx.WHITE)
+
 }
