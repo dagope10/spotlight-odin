@@ -42,19 +42,21 @@ main :: proc() {
         for xlib.Pending(x11.display) > 0 {
             xlib.NextEvent(x11.display, &event)
             event_flags |= process_event(&app, &x11, &event)
-            if .Resize in event_flags {
-                gfx.resize(&renderer, app.width, app.height)
-            }
-            if .Exit in event_flags {
-                app.running = false
-            }
 
-            if .Redraw in event_flags {
-                draw(&renderer, &app)
-                platform.egl_present(&egl_state)
-            }
         }
-       
+
+        if .Resize in event_flags {
+            gfx.resize(&renderer, app.width, app.height)
+        }
+        if .Exit in event_flags {
+            app.running = false
+        }
+
+        if .Redraw in event_flags {
+            draw(&renderer, &app)
+            platform.egl_present(&egl_state)
+        } 
+        
     }
     fmt.println("Adios!")
 
