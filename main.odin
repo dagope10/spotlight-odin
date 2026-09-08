@@ -30,7 +30,6 @@ main :: proc() {
     fmt.println("GL Renderer: ", string(gl.GetString(gl.RENDERER)))
 
     font := gfx.init_font_atlas(&arena, Font_Bytes)
-     if true do return
 
     renderer := gfx.init()
 
@@ -55,7 +54,7 @@ main :: proc() {
         }
 
         if .Redraw in event_flags {
-            draw(&renderer, &app)
+            draw_atlas(&renderer, &font, &app)
             platform.egl_present(&egl_state)
         }
         
@@ -68,8 +67,8 @@ main :: proc() {
 init_app_state :: proc() -> App_State {
     return App_State{
         running = true,
-        width = 800,
-        height = 600
+        width = 720,
+        height = 420,
     }
 }
 
@@ -95,6 +94,11 @@ process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XE
         event_flags |= {.Redraw}         
     }
     return event_flags
+}
+
+
+draw_atlas :: proc(r: ^gfx.Renderer, font: ^gfx.Font, app: ^App_State) {
+    gfx.draw_atlas(r, 0, 0, 512, 512, gfx.WHITE, font)
 }
 
 

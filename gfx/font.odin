@@ -40,6 +40,7 @@ init_font_atlas :: proc(arena: ^mem.Arena, font_bytes: []u8) -> Font {
 
     gl.GenTextures(1, &font.texture)
     gl.BindTexture(gl.TEXTURE_2D, font.texture)
+    gl.PixelStorei(gl.UNPACK_ALIGNMENT, 1)
     gl.TexImage2D(gl.TEXTURE_2D,
                   0,
                   gl.R8,
@@ -51,7 +52,6 @@ init_font_atlas :: proc(arena: ^mem.Arena, font_bytes: []u8) -> Font {
                  )
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
     gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-    gl.PixelStorei(gl.UNPACK_ALIGNMENT, 1)
 
     fmt.println("Font loaded")
 

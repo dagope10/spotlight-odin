@@ -16,6 +16,7 @@ Renderer :: struct {
     dimensions_location: i32,
     radius_location: i32,
     text_mode_location: i32,
+    atlas_location: i32,
 }
 Vec2 :: struct {
     x: f32,

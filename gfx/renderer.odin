@@ -1,6 +1,7 @@
 package gfx
 
 
+
 import gl "vendor:OpenGL"
 import "core:fmt"
 import "core:os"
@@ -54,6 +55,7 @@ init :: proc() -> Renderer {
     color_location := gl.GetUniformLocation(program_id, "uColor")
     dimensions_location := gl.GetUniformLocation(program_id, "uDimensions")
     radius_location := gl.GetUniformLocation(program_id, "uRadius")
+    atlas_location := gl.GetUniformLocation(program_id, "atlasText")
     gl.Enable(gl.BLEND)
     gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     gl.UseProgram(program_id)
@@ -62,12 +64,24 @@ init :: proc() -> Renderer {
         vao = vao,
         vbo = vbo,
         ebo = ebo,
+        width = 720,
+        height = 420,
         program_id = program_id,
         color_location = color_location,
         dimensions_location = dimensions_location,
         radius_location = radius_location,
+        atlas_location = atlas_location,
     }
 
+}
+
+draw_atlas :: proc(r: ^Renderer, x, y, width, height: u32, color: Color, font: ^Font) {
+    gl.ActiveTexture(gl.TEXTURE0)
+    gl.BindTexture(gl.TEXTURE_2D, font.texture)
+    assert(r.atlas_location != -1)
+    gl.Uniform1i(r.atlas_location, 0)
+
+    draw_rect(r, x, y, width, height, color)
 }
 
 draw_rect :: proc(r: ^Renderer,
