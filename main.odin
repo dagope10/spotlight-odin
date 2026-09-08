@@ -11,15 +11,15 @@ import "gfx"
 
 
 main :: proc() {
-
-    // if true do return
-    // Initializers
     arena: mem.Arena
     data := make([]u8, 4 * mem.Megabyte)
     mem.arena_init(&arena, data)
+
+
+    // Initializers
     
     app := init_app_state()
-    x11 := platform.init(800, 600)
+    x11 := platform.init(720, 420)
     egl_state := platform.egl_init(&x11)
 
     platform.show_window(&x11)
@@ -28,6 +28,9 @@ main :: proc() {
 
     fmt.println("GL Version: ", string(gl.GetString(gl.VERSION)))
     fmt.println("GL Renderer: ", string(gl.GetString(gl.RENDERER)))
+
+    font := gfx.init_font_atlas(&arena, Font_Bytes)
+     if true do return
 
     renderer := gfx.init()
 
@@ -42,7 +45,6 @@ main :: proc() {
         for xlib.Pending(x11.display) > 0 {
             xlib.NextEvent(x11.display, &event)
             event_flags |= process_event(&app, &x11, &event)
-
         }
 
         if .Resize in event_flags {
@@ -55,7 +57,7 @@ main :: proc() {
         if .Redraw in event_flags {
             draw(&renderer, &app)
             platform.egl_present(&egl_state)
-        } 
+        }
         
     }
     fmt.println("Adios!")
@@ -97,12 +99,42 @@ process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XE
 
 
 draw :: proc(r: ^gfx.Renderer, app: ^App_State) {
-    gfx.resize(r, app.width, app.height)
-    gfx.renderer_clear()
 
-    gfx.draw_rect(r, 100, 50, 600, 500, gfx.WHITE)
-    gfx.draw_rect(r, 120, 70, 560, 120, gfx.WHITE)
-    gfx.draw_rect(r, 120, 210, 560, 120, gfx.WHITE)
-    gfx.draw_rect(r, 120, 350, 560, 120, gfx.WHITE)
+    //
+    // Search input
+    //
+    gfx.draw_rect(
+        r,
+        24, 24,
+        672, 64,
+        gfx.COLOR_INPUT,
+        14,
+    )
 
+//
+// Results
+//
+    gfx.draw_rect(
+        r,
+        24, 104,
+        672, 64,
+        gfx.COLOR_SELECTED,
+        12,
+    )
+
+    gfx.draw_rect(
+        r,
+        24, 176,
+        672, 64,
+        gfx.COLOR_HOVER,
+        12,
+    )
+
+    gfx.draw_rect(
+        r,
+        24, 248,
+        672, 64,
+        gfx.COLOR_HOVER,
+        12,
+)
 }

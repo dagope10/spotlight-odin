@@ -13,3 +13,4 @@ Event_Flag :: enum {
 }
 
 Event_Flags :: distinct bit_set[Event_Flag]
+Font_Bytes :: #load("assets/fonts/NotoSans-Regular.ttf", []u8)

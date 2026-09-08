@@ -2,9 +2,24 @@
 
 uniform vec4 uColor;
 uniform vec2 uDimensions;
+uniform float uRadius;
 out vec4 fragColor;
 in vec2 FragUV;
 
-void main() {
-  fragColor = vec4(FragUV.x, FragUV.y, 0.0, 1.0);
+float rounded_rect_sdf(vec2 p, vec2 half_size, float radius) {
+  vec2 q = abs(p) - half_size + radius;
+  return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
 }
+
+
+void main() {
+  vec2 half_size = uDimensions * 0.5;
+  vec2 p = FragUV * uDimensions - half_size;
+
+  float dist = rounded_rect_sdf(p, half_size, uRadius);
+  float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
+  fragColor = vec4(uColor.rgb, uColor.a * alpha);
+}
+
+
+

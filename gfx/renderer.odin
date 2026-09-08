@@ -52,8 +52,10 @@ init :: proc() -> Renderer {
     }
 
     color_location := gl.GetUniformLocation(program_id, "uColor")
-    // dimensions_location = gl.GetUniformLocation(global_shader, "uColor")
-    // radius_location = gl.GetUniformLocation(global_shader, "uColor")
+    dimensions_location := gl.GetUniformLocation(program_id, "uDimensions")
+    radius_location := gl.GetUniformLocation(program_id, "uRadius")
+    gl.Enable(gl.BLEND)
+    gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     gl.UseProgram(program_id)
 
     return Renderer {
@@ -61,19 +63,32 @@ init :: proc() -> Renderer {
         vbo = vbo,
         ebo = ebo,
         program_id = program_id,
-        color_location = color_location
+        color_location = color_location,
+        dimensions_location = dimensions_location,
+        radius_location = radius_location,
     }
 
 }
 
-draw_rect :: proc(r: ^Renderer, x, y, width, height : u32, color : Color) {
+draw_rect :: proc(r: ^Renderer,
+                  x, y, width, height: u32,
+                  color: Color,
+                  radius: f32 = 0,
+                 ) {
 
     vertices := calculate_vertices(r, x, y, width, height)
     gl.BindBuffer(gl.ARRAY_BUFFER, r.vbo)
     gl.BufferSubData(gl.ARRAY_BUFFER, 0, size_of(vertices), &vertices)
     
     gl.BindVertexArray(r.vao)
-    gl.Uniform4f(r.color_location, color.r, color.g, color.b, color.a)
+    gl.Uniform4f(r.color_location,
+                 color.r,
+                 color.g,
+                 color.b,
+                 color.a,
+                )
+    gl.Uniform1f(r.radius_location, radius)
+    gl.Uniform2f(r.dimensions_location, f32(width), f32(height))
     gl.DrawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, nil)
 }
 
@@ -86,6 +101,14 @@ resize :: proc(r: ^Renderer, w, h : u32) {
     r.width = w
     r.height = h
     gl.Viewport(0, 0, i32(w), i32(h))
+}
+
+
+begin_frame :: proc(renderer: ^Renderer) 
+{
+    gl.Clear(gl.COLOR_BUFFER_BIT);
+    gl.UseProgram(renderer.program_id);
+    gl.BindVertexArray(renderer.vao);    
 }
 
 
