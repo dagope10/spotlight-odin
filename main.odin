@@ -98,7 +98,7 @@ process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XE
 
 
 draw_atlas :: proc(r: ^gfx.Renderer, font: ^gfx.Font, app: ^App_State) {
-    gfx.draw_atlas(r, 0, 0, 512, 512, gfx.WHITE, font)
+    gfx.draw_atlas(r, 0, 0, 600, 600, gfx.WHITE, font)
 }
 
 

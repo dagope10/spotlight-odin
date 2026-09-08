@@ -135,10 +135,9 @@ calculate_vertices :: proc(r: ^Renderer, x, y, width, height : u32) -> [4]Vertex
     bottom_gl := 1 - (f32(bottom) / f32(r.height)) * 2
 
     return [4]Vertex{
-        { pos = {left_gl, bottom_gl}, uv = {0, 0} },
-        { pos = {left_gl, top_gl}, uv = {0, 1} },
-        { pos = {right_gl, bottom_gl}, uv = {1, 0} },
-        { pos = {right_gl, top_gl}, uv = {1, 1} },
+        { pos = {left_gl, bottom_gl}, uv = {0, 1} },
+        { pos = {left_gl, top_gl}, uv = {0, 0} },
+        { pos = {right_gl, bottom_gl}, uv = {1, 1} },
+        { pos = {right_gl, top_gl}, uv = {1, 0} },
     }
-
 }
