@@ -4,6 +4,7 @@ uniform vec4 uColor;
 uniform vec2 uDimensions;
 uniform float uRadius;
 uniform sampler2D atlasText;
+uniform bool uIsText;
 out vec4 fragColor;
 in vec2 FragUV;
 
@@ -18,9 +19,13 @@ void main() {
   vec2 p = FragUV * uDimensions - half_size;
 
   float dist = rounded_rect_sdf(p, half_size, uRadius);
-  float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
-  float sample = texture(atlasText, FragUV).r;
-  fragColor = vec4(sample, sample, sample, 1.0);
+  float rect_alpha = 1.0 - smoothstep(0.0, 1.0, dist);
+  if (uIsText) {
+    float text_alpha = texture(atlasText, FragUV).r;
+    fragColor = vec4(uColor.rgb, uColor.a * text_alpha);
+  } else {
+    fragColor = vec4(uColor.rgb, uColor.a * rect_alpha);
+  }
 }
 
 

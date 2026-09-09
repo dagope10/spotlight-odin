@@ -54,7 +54,8 @@ main :: proc() {
         }
 
         if .Redraw in event_flags {
-            draw_atlas(&renderer, &font, &app)
+            gfx.begin_frame(&renderer)
+            draw_glyph(&renderer, &font, &app)
             platform.egl_present(&egl_state)
         }
         
@@ -77,6 +78,7 @@ process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XE
     #partial switch event.type {
         case .KeyPress:
         key := xlib.LookupKeysym(&event.xkey, 0)
+        if key == .XK_Escape do app.running = false 
         fmt.printfln("tecla: %v\n", key)
 
         case .ConfigureNotify:
@@ -97,8 +99,13 @@ process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XE
 }
 
 
-draw_atlas :: proc(r: ^gfx.Renderer, font: ^gfx.Font, app: ^App_State) {
-    gfx.draw_atlas(r, 0, 0, 600, 600, gfx.WHITE, font)
+draw_glyph :: proc(r: ^gfx.Renderer,
+                   font: ^gfx.Font,
+                   app: ^App_State,
+                   text: string = "Hello world!"
+                  )
+{
+    gfx.draw_text(r, text, 50.0, 50.0, gfx.WHITE, font)
 }
 
 
