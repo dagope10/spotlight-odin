@@ -1,7 +1,7 @@
 package platform
 import "vendor:x11/xlib"
 
-init :: proc(width, height: u32) -> X11_State {
+init :: proc(width, height: u32) -> Platform_State {
     x11: X11_State
     hints := Hints{
         flags = MWM_HINTS_DECORATIONS,
@@ -50,13 +50,58 @@ init :: proc(width, height: u32) -> X11_State {
     xlib.ChangeProperty(x11.display, x11.window, motif_hints, motif_hints, 32, xlib.PropModeReplace, &hints, 5)
     xlib.SetWMProtocols(x11.display, x11.window, &x11.delete_window, 1)
 
-    return x11
+    return Platform_State{
+        x11 = x11
+    }
 }
 
 
 
-show_window :: proc(x11: ^X11_State) {
-    xlib.MapWindow(x11.display, x11.window);
-    xlib.Flush(x11.display);
+show_window :: proc(platform_state: ^Platform_State) {
+    xlib.MapWindow(platform_state.x11.display, platform_state.x11.window);
+    xlib.Flush(platform_state.x11.display);
+}
+
+next_event :: proc(p: ^Platform_State) -> Event {
+    event : xlib.XEvent
+    xlib.NextEvent(p.x11.display, &event)
+
+    #partial switch event.type {
+        case .KeyPress:
+        text_buffer: [32]u8
+        key: xlib.KeySym
+        text_len := xlib.LookupString(&event.xkey, raw_data(text_buffer[:]), len(text_buffer), &key, nil)
+
+        if key == .XK_Escape do return Event{kind = .Escape}
+        if key == .XK_BackSpace do return Event{kind = .Backspace}
+
+        if text_len > 0 {
+            return Event{
+                kind = .Text_Input,
+                text = text_buffer,
+                text_len = int(text_len),
+
+                width = 0,
+                height = 0,
+            }
+        }
+
+        case .ConfigureNotify:
+        return Event{
+            kind = .Resize,
+            width = u32(event.xconfigure.width),
+            height = u32(event.xconfigure.height),
+        }
+
+
+        case .ClientMessage:
+        if xlib.Atom(event.xclient.data.l[0]) == p.x11.delete_window do return Event{ kind = .Close }
+
+        case .Expose:
+        return Event{kind = .Redraw}
+    }
+    return Event{ kind = .None }
+
+    
 }
 

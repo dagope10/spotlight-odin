@@ -30,6 +30,30 @@ Hints :: struct {
     status: c.ulong,
 }
 
+Platform_State :: struct {
+    x11: X11_State
+}
+
+Event_Kind :: enum {
+    None,
+    Text_Input,
+    Backspace,
+    Enter,
+    Escape,
+    Resize,
+    Redraw,
+    Close,
+}
+
+Event :: struct {
+    kind: Event_Kind,
+    text: [32]u8,
+    text_len: int,
+
+    width: u32,
+    height: u32,
+}
+
 MWM_HINTS_DECORATIONS :: c.ulong(1 << 1)
 XA_ATOM :: xlib.Atom(4)
 

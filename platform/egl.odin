@@ -2,10 +2,10 @@ package platform
 
 import "vendor:egl"
 import "core:fmt"
-egl_init :: proc(x11: ^X11_State) -> EGL_State {
+egl_init :: proc(platform_state: ^Platform_State) -> EGL_State {
 
     egl_state: EGL_State
-    egl_state.display = egl.GetPlatformDisplay(egl.Platform.X11_KHR, x11.display, nil)
+    egl_state.display = egl.GetPlatformDisplay(egl.Platform.X11_KHR, platform_state.x11.display, nil)
     assert(egl_state.display != egl.NO_DISPLAY)
     assert(egl.Initialize(egl_state.display, nil, nil) != egl.FALSE)
 
@@ -20,7 +20,7 @@ egl_init :: proc(x11: ^X11_State) -> EGL_State {
     num_config: i32
     assert(egl.ChooseConfig(egl_state.display, &attrib_list[0], &egl_state.config,1, &num_config) != egl.FALSE)
     assert(egl.BindAPI(egl.OPENGL_API) != false)
-    egl_state.surface = egl.CreateWindowSurface(egl_state.display, egl_state.config, egl.NativeWindowType(uintptr(x11.window)), nil)
+    egl_state.surface = egl.CreateWindowSurface(egl_state.display, egl_state.config, egl.NativeWindowType(uintptr(platform_state.x11.window)), nil)
     assert(egl_state.surface != egl.NO_SURFACE)
     fmt.printfln("Surface created")
     attrs := []i32{
