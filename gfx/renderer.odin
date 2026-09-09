@@ -80,6 +80,10 @@ init :: proc() -> Renderer {
 
 draw_text :: proc(r: ^Renderer, text: string, x, y: f32, color: Color, font: ^Font) {
     pen_x := x
+    gl.ActiveTexture(gl.TEXTURE0)
+    gl.BindTexture(gl.TEXTURE_2D, font.texture)
+    gl.Uniform1i(r.atlas_location, 0)
+    gl.Uniform1i(r.is_text_location, 1)
 
     for character in text {
         glyph := font.baked_chars[character - 32]
@@ -89,13 +93,9 @@ draw_text :: proc(r: ^Renderer, text: string, x, y: f32, color: Color, font: ^Fo
 }
 
 draw_glyph :: proc(r: ^Renderer, character: rune, x, y: f32, color: Color, font: ^Font) {
-    gl.ActiveTexture(gl.TEXTURE0)
-    gl.BindTexture(gl.TEXTURE_2D, font.texture)
-    gl.Uniform1i(r.atlas_location, 0)
-    gl.Uniform1i(r.is_text_location, 1)
+
 
     glyph := font.baked_chars[character - 32]
-    fmt.printfln("char: %v", glyph)
 
     quad_x := x + glyph.xoff
     quad_y := y + glyph.yoff

@@ -55,7 +55,7 @@ main :: proc() {
 
         if .Redraw in event_flags {
             gfx.begin_frame(&renderer)
-            draw_glyph(&renderer, &font, &app)
+            draw_input(&renderer, &font)
             platform.egl_present(&egl_state)
         }
         
@@ -99,53 +99,30 @@ process_event :: proc(app: ^App_State, x11: ^platform.X11_State, event: ^xlib.XE
 }
 
 
-draw_glyph :: proc(r: ^gfx.Renderer,
-                   font: ^gfx.Font,
-                   app: ^App_State,
-                   text: string = "Hello world!"
-                  )
-{
-    gfx.draw_text(r, text, 50.0, 50.0, gfx.WHITE, font)
-}
+draw_input :: proc(r: ^gfx.Renderer, font: ^gfx.Font) {
+    box_x: f32 = 24.0
+    box_y: f32 = 24.0
+    box_width: f32 = 672.0
+    box_height: f32 = 64.0
 
-
-draw :: proc(r: ^gfx.Renderer, app: ^App_State) {
-
-    //
-    // Search input
-    //
     gfx.draw_rect(
         r,
-        24, 24,
-        672, 64,
+        u32(box_x), u32(box_y),
+        u32(box_width), u32(box_height),
         gfx.COLOR_INPUT,
         14,
     )
 
-//
-// Results
-//
-    gfx.draw_rect(
-        r,
-        24, 104,
-        672, 64,
-        gfx.COLOR_SELECTED,
-        12,
-    )
+    font_height := font.ascent - font.descent
+    
+    // Center baseline 
+    baseline_y := box_y + (box_height - font_height) * 0.5 + font.ascent
+    
 
-    gfx.draw_rect(
-        r,
-        24, 176,
-        672, 64,
-        gfx.COLOR_HOVER,
-        12,
-    )
-
-    gfx.draw_rect(
-        r,
-        24, 248,
-        672, 64,
-        gfx.COLOR_HOVER,
-        12,
-)
+    gfx.draw_text(r, "Hello world!", 50.0, baseline_y, gfx.WHITE, font)
 }
+
+
+
+
+
