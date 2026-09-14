@@ -45,11 +45,6 @@ search_files :: proc(scratch_arena: ^vmem.Arena, persistent_alloc: runtime.Alloc
         if entry != {} do append(&entries, entry)
     }
 
-    for entry in entries {
-        fmt.printfln("name: %v", entry.name)
-        fmt.printfln("comment: %v", entry.comment)
-        fmt.printfln("exec: %v", entry.exec)
-    }
 
     return entries[:]
 
@@ -62,3 +57,18 @@ is_desktop_entry :: proc(entry_name: string) -> bool {
 is_entry :: proc(line: string) -> bool {
     return strings.has_prefix(line, "[")
 }
+
+
+filter_entries:: proc(entries:[]Desktop_Entry, app: ^App_State) {
+    app.results_len = 0
+    query := string(app.buffer[:app.buffer_len])
+
+    for entry in entries {
+        if app.results_len == len(app.results) do break
+        if strings.contains(strings.to_lower(entry.name), strings.to_lower(string(query))) {
+            app.results[app.results_len] = entry
+            app.results_len += 1
+        }
+    }
+}
+

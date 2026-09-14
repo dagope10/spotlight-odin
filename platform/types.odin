@@ -43,6 +43,8 @@ Event_Kind :: enum {
     Resize,
     Redraw,
     Close,
+    Up,
+    Down,
 }
 
 Event :: struct {

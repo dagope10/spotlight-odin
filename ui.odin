@@ -28,7 +28,38 @@ draw_input :: proc(r: ^gfx.Renderer, font: ^gfx.Font, buffer: []u8) {
     gfx.draw_text(r, string(buffer), 50.0, baseline_y, gfx.WHITE, font)
 }
 
+draw_results :: proc(r: ^gfx.Renderer, font: ^gfx.Font, app: ^App_State) {
+    row_y: f32 = 100.0
+    row_height: f32 = 44.0
+    row_gap: f32 = 4.0
 
-draw_results :: proc(r: ^gfx.Renderer, font: ^gfx.Font, buffer: []u8) {
-    
+    font_height := font.ascent - font.descent
+
+    for entry, index in app.results[:app.results_len] {
+        color := gfx.COLOR_SELECTED if index == app.selected_index else gfx.COLOR_INPUT
+        gfx.draw_rect(
+            r,
+            24,
+            u32(row_y),
+            672,
+            u32(row_height),
+            color,
+            8,
+        )
+
+        baseline_y := row_y +
+                      (row_height - font_height) * 0.5 +
+                      font.ascent
+
+        gfx.draw_text(
+            r,
+            entry.name,
+            50.0,
+            baseline_y,
+            gfx.WHITE,
+            font,
+        )
+
+        row_y += row_height + row_gap
+    }
 }

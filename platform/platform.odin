@@ -1,5 +1,6 @@
 package platform
 import "vendor:x11/xlib"
+import "core:fmt"
 
 init :: proc(width, height: u32) -> Platform_State {
     x11: X11_State
@@ -72,8 +73,13 @@ next_event :: proc(p: ^Platform_State) -> Event {
         key: xlib.KeySym
         text_len := xlib.LookupString(&event.xkey, raw_data(text_buffer[:]), len(text_buffer), &key, nil)
 
+        fmt.printfln("key: %v", key)
+
         if key == .XK_Escape do return Event{kind = .Escape}
         if key == .XK_BackSpace do return Event{kind = .Backspace}
+        if key == .XK_Up do return Event{kind = .Up}
+        if key == .XK_Down do return Event{kind = .Down }
+        if key == .XK_Return do return Event{kind = .Enter }
 
         if text_len > 0 {
             return Event{

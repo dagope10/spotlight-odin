@@ -6,6 +6,9 @@ App_State :: struct {
     height: u32,
     buffer: [256]u8,
     buffer_len: int,
+    results: [6]Desktop_Entry,
+    selected_index: int,
+    results_len: int,
 }
 
 App_Event :: struct {
@@ -19,6 +22,8 @@ App_Event_Kind :: enum {
     Enter,
     Escape,
     Resize,
+    Up,
+    Down,
 }
 
 

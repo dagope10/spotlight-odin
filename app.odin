@@ -1,14 +1,14 @@
 package main
 
 import "platform"
-
+import "core:fmt"
 
 init_app_state :: proc() -> App_State {
     return App_State{
         running = true,
         width = 720,
         height = 420,
-        buffer_len = 0
+        buffer_len = 0,
     }
 }
 
@@ -33,7 +33,20 @@ process_event :: proc(app: ^App_State, p: ^platform.Platform_State, event: platf
         event_flags |= {.Redraw}
     }
 
+    case .Up:
+        if app.selected_index > 0 {
+            app.selected_index -= 1
+            event_flags |= {.Redraw}
+        }
+
+    case .Down:
+        if app.selected_index < len(app.results) {
+            app.selected_index += 1
+            event_flags |= {.Redraw}
+        }
+
     case .Enter:
+        fmt.printfln("chosen: %v", app.results[app.selected_index])
 
 
     case .Escape, .Close:

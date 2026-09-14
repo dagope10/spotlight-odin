@@ -13,6 +13,7 @@ import "gfx"
 main :: proc() {
     persistent_arena: vmem.Arena
     scratch_arena: vmem.Arena
+    results: [6]Desktop_Entry
 
     if err := vmem.arena_init_static(&persistent_arena); err != nil {
         fmt.panicf("Error initiating arena: %v", err)
@@ -23,12 +24,8 @@ main :: proc() {
 
     persistent_alloc := vmem.arena_allocator(&persistent_arena)
     scratch_alloc := vmem.arena_allocator(&scratch_arena)
-    fmt.printfln("persistent alloc: %v", persistent_alloc)
-    fmt.printfln("scratch alloc: %v", scratch_alloc)
 
     entries := search_files(&scratch_arena, persistent_alloc)
-    
-    fmt.printfln("entries: %v", entries)
 
 
     // Initializers
@@ -67,8 +64,11 @@ main :: proc() {
         }
 
         if .Redraw in event_flags {
+            
             gfx.begin_frame(&renderer)
             draw_input(&renderer, &font, app.buffer[:app.buffer_len])
+            filter_entries(entries, &app)
+            draw_results(&renderer, &font, &app)
             platform.egl_present(&egl_state)
         }
         
@@ -76,10 +76,3 @@ main :: proc() {
     fmt.println("Adios!")
 
 }
-
-
-
-
-
-
-
