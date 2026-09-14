@@ -64,7 +64,6 @@ main :: proc() {
         }
 
         if .Redraw in event_flags {
-            
             gfx.begin_frame(&renderer)
             draw_input(&renderer, &font, app.buffer[:app.buffer_len])
             filter_entries(entries, &app)

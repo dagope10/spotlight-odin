@@ -2,6 +2,7 @@ package main
 
 import "platform"
 import "core:fmt"
+import "core:os"
 
 init_app_state :: proc() -> App_State {
     return App_State{
@@ -40,13 +41,21 @@ process_event :: proc(app: ^App_State, p: ^platform.Platform_State, event: platf
         }
 
     case .Down:
-        if app.selected_index < len(app.results) {
+        if app.selected_index < app.results_len {
             app.selected_index += 1
             event_flags |= {.Redraw}
         }
 
     case .Enter:
-        fmt.printfln("chosen: %v", app.results[app.selected_index])
+    if app.results_len > 0 && app.selected_index < app.results_len {
+        fmt.println("Selected")
+        selected_app := app.results[app.selected_index].exec
+        process, err := os.process_start(os.Process_Desc{
+            command = []string{selected_app},
+        })
+
+        if err == nil do app.running = false
+    }
 
 
     case .Escape, .Close:
