@@ -2,7 +2,7 @@ package main
 
 import "core:fmt"
 import "core:os"
-import "core:mem"
+import vmem "core:mem/virtual"
 import "platform"
 import "vendor:x11/xlib"
 import gl "vendor:OpenGL"
@@ -11,9 +11,24 @@ import "gfx"
 
 
 main :: proc() {
-    arena: mem.Arena
-    data := make([]u8, 4 * mem.Megabyte)
-    mem.arena_init(&arena, data)
+    persistent_arena: vmem.Arena
+    scratch_arena: vmem.Arena
+
+    if err := vmem.arena_init_static(&persistent_arena); err != nil {
+        fmt.panicf("Error initiating arena: %v", err)
+    }
+    if err := vmem.arena_init_static(&scratch_arena); err != nil {
+        fmt.panicf("Error initiating scratch arena: %v", err)
+    }
+
+    persistent_alloc := vmem.arena_allocator(&persistent_arena)
+    scratch_alloc := vmem.arena_allocator(&scratch_arena)
+    fmt.printfln("persistent alloc: %v", persistent_alloc)
+    fmt.printfln("scratch alloc: %v", scratch_alloc)
+
+    entries := search_files(&scratch_arena, persistent_alloc)
+    
+    fmt.printfln("entries: %v", entries)
 
 
     // Initializers
@@ -28,7 +43,7 @@ main :: proc() {
     fmt.println("GL Version: ", string(gl.GetString(gl.VERSION)))
     fmt.println("GL Renderer: ", string(gl.GetString(gl.RENDERER)))
 
-    font := gfx.init_font_atlas(&arena, Font_Bytes)
+    font := gfx.init_font_atlas(&persistent_arena, Font_Bytes)
 
     renderer := gfx.init()
 

@@ -1,5 +1,6 @@
 package gfx
 
+import vmem "core:mem/virtual"
 import "core:mem"
 import "core:fmt"
 import stbtt "vendor:stb/truetype"
@@ -19,16 +20,16 @@ Font :: struct {
 }
 
 
-init_font_atlas :: proc(arena: ^mem.Arena, font_bytes: []u8) -> Font {
+init_font_atlas :: proc(arena: ^vmem.Arena, font_bytes: []u8) -> Font {
     font := Font{
         atlas_width = 512,
         atlas_height = 512,
         size = 32.0,
     }
     
-    temp_region := mem.begin_arena_temp_memory(arena)
-    defer mem.end_arena_temp_memory(temp_region)
-    temp_bitmap, err := mem.arena_alloc_bytes_non_zeroed(arena, 256 * mem.Kilobyte)
+    temp_region := vmem.arena_temp_begin(arena)
+    defer vmem.arena_temp_end(temp_region)
+    temp_bitmap, err := vmem.make(arena,[]u8, 256 * mem.Kilobyte)
     assert(err == nil)
 
     stbtt.GetScaledFontVMetrics(raw_data(font_bytes),

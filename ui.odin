@@ -27,3 +27,8 @@ draw_input :: proc(r: ^gfx.Renderer, font: ^gfx.Font, buffer: []u8) {
     
     gfx.draw_text(r, string(buffer), 50.0, baseline_y, gfx.WHITE, font)
 }
+
+
+draw_results :: proc(r: ^gfx.Renderer, font: ^gfx.Font, buffer: []u8) {
+    
+}
